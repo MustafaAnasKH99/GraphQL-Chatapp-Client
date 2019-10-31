@@ -1,23 +1,63 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState } from 'react';
 import './App.css';
 import SignInSide from './components/SignInSide.js';
+import ContextApi from './Context'
+
 import { ApolloProvider } from '@apollo/react-hooks';
-import ApolloClient from 'apollo-boost'
+import { ApolloClient } from 'apollo-client';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { WebSocketLink } from 'apollo-link-ws';
+
+import Home from './components/Home'
 
 
+
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+const token = localStorage.getItem('token');
+
+// Create a WebSocket link :
+const link = new WebSocketLink({
+  uri: `ws://localhost:4000/graphql`,
+  options: {
+    reconnect: true,
+  }
+})
+
+
+const subscriptionMiddleware = {
+  applyMiddleware: async (options, next) => {
+    options.token = `Bearer ${token}`
+    next()
+  },
+}
+
+link.subscriptionClient.use([subscriptionMiddleware])
+
+
+const cache = new InMemoryCache();
+// const link = wsLink
 const client = new ApolloClient({
-  uri: 'http://localhost:4000/graphql'
+  link,
+  cache
 })
 
 function App() {  
+  const [ stateToken, setTokenFromApp ] = useState(token)
+
   return (
     <ApolloProvider client={client}>
-      <div className="App">
-        <header className="App-header">
-          <SignInSide />
-        </header>
-      </div>
+      <ContextApi.Provider value={token}>
+        <div className="App">
+          <header className="App-header">
+          {
+            stateToken ? <Home setTokenFromApp={setTokenFromApp} /> : <SignInSide setTokenFromApp={setTokenFromApp}/>
+          }
+          <ToastContainer />
+          </header>
+        </div>
+      </ContextApi.Provider>
     </ApolloProvider>
   );
 }

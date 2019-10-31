@@ -14,7 +14,11 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 
 import LOGIN_USER from '../Mutations/loginUser'
+import CREATE_USER from '../Mutations/createUser'
 import { useMutation } from '@apollo/react-hooks';
+
+import { toast } from 'react-toastify';
+
 
 function Copyright() {
   return (
@@ -58,31 +62,74 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function SignInSide() {
+export default function SignInSide({ setTokenFromApp }) {
   const _token = localStorage.getItem('token')
   const classes = useStyles();
 
+  // Login hooks
   const [ token, setToken ] = useState(_token)
+  const [ name, setName ] = useState('')
+  const [ email, setEmail ] = useState('')
   const [ mobile, setMobile ] = useState('')
   const [ password, setPassword ] = useState('')
+  
+  const [sign, setSign] = useState('login')
 
-  const [ loginUser, { loading, error, called }] = useMutation(
+  const [isLoading, setLoading] = useState(false)
+
+  
+  const [ loginUser, { loading, error }] = useMutation(
     LOGIN_USER,
     {
       onCompleted: data => {
+        console.log('LOGIN COMPLETED')
         const { loginUser } = data
         localStorage.setItem('token', loginUser)
         setToken(loginUser)
+        setTokenFromApp(loginUser)
+        setLoading(false) 
         console.log(loginUser)
       }
     }
-    )
+  )
+
+  if(error) console.log('check error', error)
+
+  //Signup hooks
+  const [ createUser ] = useMutation(
+    CREATE_USER,
+    {
+      onCompleted: data => {
+        const { createUser } = data
+        data !== null ? toast('Successfully created! now you can go sign in 🚀 ') : toast('sorry something went wrong')
+        console.log(createUser)
+        setSign('login')
+      }
+    }
+  )
 
   const SignIn = async (e) => {
     e.preventDefault()
+    console.log(mobile, password)
     await loginUser({ 
       variables: { mobile: mobile, password: password },
     })
+    console.log('Signin function finished')
+  }
+
+  const SignUp = async (e) => {
+    e.preventDefault()
+    await createUser({ 
+      variables: { name: name, email: email, mobile: mobile, password: password },
+    })
+  }
+
+  const handleNameChange = (e) => {
+    setName(e.target.value)
+  }
+  
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value)
   }
 
   const handleMobileChange = (e) => {
@@ -92,87 +139,153 @@ export default function SignInSide() {
   const handlePasswordChange = (e) => {
     setPassword(e.target.value)
   }
-
-  if ( token ){
-    return (
-      <div>
-        <h1>User logged in</h1>
-        <button onClick={() => {
-          localStorage.removeItem('token')
-          setToken("")
-        }}>Log Out</button>
-      </div>
-    )
-  } else {
-    return (
-      <Grid container component="main" className={classes.root}>
-      <CssBaseline />
-      <Grid item xs={false} sm={4} md={7} className={classes.image} />
-      <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign in
-          </Typography>
-          <form className={classes.form} noValidate onSubmit={(e) => SignIn(e)}>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="mobile"
-              label="Mobile No."
-              name="mobile"
-              autoComplete="mobile"
-              autoFocus
-              onChange={(e) => handleMobileChange(e)}
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              onChange={(e) => handlePasswordChange(e)}
-            />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              Sign In
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Forgot password?
-                </Link>
+      return (
+        <Grid container component="main" className={classes.root}>
+        <CssBaseline />
+        <Grid item xs={false} sm={4} md={7} className={classes.image} />
+        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+          <div className={classes.paper}>
+            <Avatar className={classes.avatar}>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Sign in
+            </Typography>
+            {
+              sign === 'login' ? (
+                <form className={classes.form} noValidate onSubmit={(e) => SignIn(e)}>
+              <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="mobile"
+                label="Mobile No."
+                name="mobile"
+                autoComplete="mobile"
+                autoFocus
+                onChange={(e) => handleMobileChange(e)}
+              />
+              <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                onChange={(e) => handlePasswordChange(e)}
+              />
+              <FormControlLabel
+                control={<Checkbox value="remember" color="primary" />}
+                label="Remember me"
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+              >
+                Sign In
+              </Button>
+              <Grid container>
+                <Grid item xs>
+                  <Link href="#" variant="body2">
+                    Forgot password?
+                  </Link>
+                </Grid>
+                <Grid item>
+                  <Link href="#" variant="body2" onClick={() => setSign('signup')}>
+                    {"Don't have an account? Sign Up"}
+                  </Link>
+                </Grid>
               </Grid>
-              <Grid item>
-                <Link href="#" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
-              </Grid>
-            </Grid>
-            <Box mt={5}>
-              <Copyright />
-            </Box>
-          </form>
-        </div>
+              <Box mt={5}>
+                <Copyright />
+              </Box>
+            </form>
+              ) : (
+                <form className={classes.form} noValidate onSubmit={(e) => SignUp(e)}>
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="name"
+                        label="Name"
+                        name="name"
+                        autoFocus
+                        onChange={(e) => handleNameChange(e)}
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email"
+                        name="email"
+                        autoComplete="email"
+                        autoFocus
+                        onChange={(e) => handleEmailChange(e)}
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="mobile"
+                        label="Mobile No."
+                        name="mobile"
+                        autoComplete="mobile"
+                        autoFocus
+                        onChange={(e) => handleMobileChange(e)}
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        id="password"
+                        autoComplete="current-password"
+                        onChange={(e) => handlePasswordChange(e)}
+                    />
+                    <FormControlLabel
+                        control={<Checkbox value="remember" color="primary" />}
+                        label="Remember me"
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        className={classes.submit}
+                        value="Sign Up"
+                    >
+                    Sign Up
+                    </Button>
+                    <Grid container>
+                        <Grid item>
+                            <Link href="#" variant="body2" onClick={() => setSign('login')}>
+                            {"Have an account already? Login!"}
+                            </Link>
+                        </Grid>
+                    </Grid>
+                    <Box mt={5}>
+                        <Copyright />
+                    </Box>
+                </form>
+              )
+            }
+          </div>
+        </Grid>
       </Grid>
-    </Grid>
-    )
-  }
+      )
+  
 }
