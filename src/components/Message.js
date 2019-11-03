@@ -1,6 +1,6 @@
 import React from 'react'
-import { useQuery } from '@apollo/react-hooks';
-import { makeStyles } from '@material-ui/core/styles';
+import { useQuery } from '@apollo/react-hooks'
+import { makeStyles } from '@material-ui/core/styles'
 import { CircularProgress } from '@material-ui/core'
 import { List, ListItem, ListItemText, Paper } from '@material-ui/core'
 
@@ -25,6 +25,7 @@ const useStyles = makeStyles(theme => ({
         maxHeight: 400,
         height: '100%',
         width: '100%',
+        maxWidth: 600,
         overflow: 'auto'
     },
 
