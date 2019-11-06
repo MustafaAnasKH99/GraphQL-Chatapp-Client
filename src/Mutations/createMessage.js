@@ -7,6 +7,7 @@ const CREATE_MESSAGE = gql`
           chatId: $chatId,
           content: $content,
         }){
+          id
           content
         }
       }

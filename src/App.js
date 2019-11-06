@@ -10,6 +10,8 @@ import { WebSocketLink } from 'apollo-link-ws';
 
 import Home from './components/Home'
 
+
+
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -17,7 +19,7 @@ const token = localStorage.getItem('token');
 
 // Create a WebSocket link :
 const link = new WebSocketLink({
-  uri: `wss://graphql-chatapp-api.herokuapp.com/graphql`,
+  uri: `ws://localhost:4000/graphql`,
   options: {
     reconnect: true,
   }
@@ -43,17 +45,16 @@ const client = new ApolloClient({
 
 function App() {  
   const [ stateToken, setTokenFromApp ] = useState(token)
-
+  console.log('stateToken')
+  console.log(stateToken)
   return (
     <ApolloProvider client={client}>
       <ContextApi.Provider value={token}>
-        <div className="App">
-          <header className="App-header">
+        <div className="App main-app-container">
           {
             stateToken ? <Home setTokenFromApp={setTokenFromApp} /> : <SignInSide setTokenFromApp={setTokenFromApp}/>
           }
           <ToastContainer />
-          </header>
         </div>
       </ContextApi.Provider>
     </ApolloProvider>

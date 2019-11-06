@@ -20,6 +20,13 @@ const useStyles = makeStyles(theme => ({
     input: {
       display: 'none',
     },
+    mainTitle: {
+      color: "#1de9b6",
+      fontWeight: "Bold"
+    },
+    main: {
+      borderRadius: 25,
+    }
   })
 );
 
@@ -34,8 +41,9 @@ const Home = ({ setTokenFromApp }) => {
     const { data } = useQuery(USER,
         {
             onCompleted: () => {
-                toast(`Hello ${data.fetchCurrentUser.name} 👾 `)
+                toast(`Hello ${data.fetchCurrentUser.name} 👽 `, { fontWeight: 'bold', fontSize: '50px'})
                 audio.play()
+                console.log(fetchedData)
             }
         }
     )
@@ -55,8 +63,8 @@ const Home = ({ setTokenFromApp }) => {
     if(fetchedData === true){
         return ( 
             <div>
-                <h1>We're honoured, {data.fetchCurrentUser.name}</h1>
-                <Chat currentUser={data.fetchCurrentUser}/>
+                <h1 className={`${classes.mainTitle} is-secondary`}>HONOURED, {data.fetchCurrentUser.name} 🎆</h1>
+                <Chat className={classes.main} currentUser={data.fetchCurrentUser}/>
                 <Button variant="contained" color="secondary" className={classes.button} onClick={() => {
                     localStorage.removeItem('token')
                     setTokenFromApp()
