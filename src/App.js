@@ -19,7 +19,7 @@ const token = localStorage.getItem('token');
 
 // Create a WebSocket link :
 const link = new WebSocketLink({
-  uri: `ws://localhost:4000/graphql`,
+  uri: `wss://localhost:4000/graphql`,
   options: {
     reconnect: true,
   }
