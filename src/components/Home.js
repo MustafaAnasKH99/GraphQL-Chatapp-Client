@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -54,9 +54,19 @@ const Home = ({ setTokenFromApp }) => {
         }
     )
 
-    if (error) console.log(error)
+    if (error){
+        error.graphQLErrors.map(({ message }, i) => (
+           toast(message, { color: "red"})
+        ))
+    }
+
+    useEffect(() => {
+        console.log('it ran')
+    }, [])
+
     if(data){
         if(!fetchedData){
+            console.log('updating the state with fetched data')
             setFetchedData(true)
         }
     } 
