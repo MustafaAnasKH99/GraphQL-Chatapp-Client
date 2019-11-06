@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 // Material UI
 import { Input, Button } from '@material-ui/core'
@@ -45,6 +45,10 @@ const CreateMessage = ({refetch, chatId, currentUser}) => {
     const classes = useStyles();
     const [ message, setMessage ] = useState('Say something')
 
+    useEffect(() => {
+        
+    }, [])
+
     const [ createMessage ] = useMutation(
     CREATE_MESSAGE,
     // {
@@ -56,22 +60,21 @@ const CreateMessage = ({refetch, chatId, currentUser}) => {
     )
 
     const { data, error } = useSubscription(
-        NEW_MESSAGE,
+        NEW_MESSAGE, 
+        {
+            onSubscriptionComplete: () => console.log('completed'),
+            onSubscriptionData: (subscriptionData) => {
+                console.log('subscriptionData')
+                console.log(subscriptionData.subscriptionData.data.newMessage.content)
+                let new_message = subscriptionData.subscriptionData.data.newMessage.content
+                toast(`${new_message} 🔔`)
+                audio.play()
+                refetch()
+            } 
+        }
     )
 
-    if (error) console.log(error.graphQLErrors)
-    if (data) {
-        console.log('data')
-        console.log(data)
-        if (data.newMessage){
-            toast(`New Message 💟`)
-            console.log(data.newMessage)
-            audio.play()
-        } else {
-            console.log('no data')
-        }
-        refetch()
-    }
+    if (error) toast(error.graphQLErrors, {position: "top-left"})
 
     const handleChange = (e) => {
         setMessage(e.target.value)
@@ -82,7 +85,6 @@ const CreateMessage = ({refetch, chatId, currentUser}) => {
         await createMessage({ 
             variables: { chatId: chatId, content: message },
         })
-        // refetch()
     }
 
     return ( 
